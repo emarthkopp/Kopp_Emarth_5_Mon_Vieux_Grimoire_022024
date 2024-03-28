@@ -54,6 +54,7 @@ function BookForm({ book, validate }) {
         data.rating = 0;
         /* eslint-enable no-param-reassign */
       }
+      console.log(data);
       const newBook = await addBook(data);
       if (!newBook.error) {
         validate(true);

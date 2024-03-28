@@ -1,0 +1,42 @@
+@url =http://localhost:3000/api/books
+@token =eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NWYyZjliNzIzZWVkNmM3MGUyZDY5ZjAiLCJpYXQiOjE3MTE1NjI4NDAsImV4cCI6MTcxMTY0OTI0MH0.sMTCepna_ZoX2RgV_i98CitZS43oT7aqtW19kxe45Tw
+@id=6605556e9c6a84c841f93d65
+###
+
+GET {{url}}
+accept: application/json
+# Authorization: Bearer {{token}}
+###
+
+GET {{url}}/{{id}}
+accept: application/json
+# Authorization: Bearer {{token}}
+###
+
+POST  {{url}}
+accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "book": {
+    "userId": "65f2f9b723eed6c70e2d69f0",
+    "title": "alice",
+    "author": "carrol",
+    "year": "1800",
+    "genre": "Aventure"
+  }
+}
+###
+
+POST  {{url}}
+accept: application/json
+Authorization: Bearer {{token}}
+Content-Type: multipart/form-data
+
+------WebKitFormBoundaryWiY3IfrusPWNxOl5
+Content-Disposition: form-data; name="book"
+
+{"userId":"65f2f9b723eed6c70e2d69f0","title":"alice","author":"carrol","year":"1800","genre":"Aventure","ratings":[{"userId":"65f2f9b723eed6c70e2d69f0","grade":4}],"averageRating":4}
+------WebKitFormBoundaryWiY3IfrusPWNxOl5
+
+###
