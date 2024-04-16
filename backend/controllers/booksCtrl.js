@@ -3,8 +3,8 @@ const Book = require("../models/book");
 const fs = require("fs");
 
 exports.createBook = (req, res, next) => {
-  
   const bookObject = JSON.parse(req.body.book);
+  console.log(bookObject)
   delete bookObject._id;
   delete bookObject._userId;
   console.log(bookObject);
@@ -21,11 +21,10 @@ console.log(book)
     .save()
     .then(() => {res.status(201).json({ message: "Livre enregistré !" })})
     .catch((error) => {res.status(400).json({ error })});
-  console.log(book, "2");
 };
 
 exports.addRating = (req, res, next) => {
-  const { userId, grade } = req.body;
+  const { userId, rating } = req.body;
   const bookId = req.params.id;
 
   Book.findById(bookId)
@@ -40,10 +39,10 @@ exports.addRating = (req, res, next) => {
       );
       if (existingRating) {
         // Mettre à jour la note existante
-        existingRating.grade = grade;
+        existingRating.grade = rating;
       } else {
         // Ajouter une nouvelle note
-        book.ratings.push({ userId, grade });
+        book.ratings.push({ userId, grade: rating });
       }
 
       // Recalculer la moyenne des notes
@@ -52,10 +51,13 @@ exports.addRating = (req, res, next) => {
         book.ratings.length;
 
       // Sauvegarder les modifications
-      return book.save();
-    })
-    .then(() => {
-      res.status(200).json({ message: "Note ajoutée avec succès" });
+      book.save()
+      .then((book) => {
+        res.status(200).json(book);
+      })
+      .catch((error) => {
+        res.status(500).json({ error });
+      });
     })
     .catch((error) => {
       res.status(500).json({ error });
@@ -92,40 +94,40 @@ exports.modifyBook = (req, res, next) => {
 };
 
 exports.updateRating = (req, res, next) => {
-  console.log(req.body)
-  const { userId, grade } = req.body;
+  const { userId, rating } = req.body;
   const bookId = req.params.id;
-  let bookUpdated = {}
+
   Book.findById(bookId)
     .then((book) => {
       if (!book) {
         return res.status(404).json({ message: "Livre non trouvé" });
       }
-      // Rechercher la note de l'utilisateur dans le livre
-      const userRatingIndex = book.ratings.findIndex(
+
+      // Vérifier si l'utilisateur a déjà noté ce livre
+      const existingRating = book.ratings.find(
         (rating) => rating.userId === userId
       );
-      // Mettre à jour la note si elle existe
-      if (userRatingIndex !== -1) {
-        book.ratings[userRatingIndex].grade = grade;
-        // Recalculer la moyenne des notes
-        book.averageRating =
-          book.ratings.reduce((acc, rating) => acc + rating.grade, 0) /
-          book.ratings.length;
-        // Sauvegarder les modifications
-        return book.save();
+      if (existingRating) {
+        // Mettre à jour la note existante
+        existingRating.grade = rating;
       } else {
-        book.ratings.push({ userId, grade });
-        book.averageRating =
-          book.ratings.reduce((acc, rating) => acc + rating.grade, 0) /
-          book.ratings.length;
+        // Ajouter une nouvelle note
+        book.ratings.push({ userId, grade: rating });
       }
-      bookUpdated = {...book}
-    })
-    .then(() => {
-      Book.findOne({ _id: req.params.id })
-      .then((book) => res.status(200).json(book))
-      .catch((error) => res.status(404).json({ error }));
+
+      // Recalculer la moyenne des notes
+      book.averageRating =
+        book.ratings.reduce((acc, rating) => acc + rating.grade, 0) /
+        book.ratings.length;
+
+      // Sauvegarder les modifications
+      book.save()
+      .then((book) => {
+        res.status(200).json(book);
+      })
+      .catch((error) => {
+        res.status(500).json({ error });
+      });
     })
     .catch((error) => {
       res.status(500).json({ error });
