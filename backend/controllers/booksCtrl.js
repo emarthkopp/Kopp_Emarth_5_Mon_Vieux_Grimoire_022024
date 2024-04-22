@@ -1,14 +1,23 @@
 const Book = require("../models/book");
-
+const sharp = require("sharp");
+const path = require("path");
 const fs = require("fs");
 
-exports.createBook = (req, res, next) => {
+exports.createBook = async (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
   console.log(bookObject)
   delete bookObject._id;
   delete bookObject._userId;
-  console.log(bookObject);
-  console.log(req.file.filename);
+  await sharp(req.file.path)
+    .resize(500)
+    .jpeg({ quality: 80})
+    .toFile(path.resolve(req.file.destination, "resized", req.file.filename))
+    .then(() => {
+        fs.unlinkSync(req.file.path);
+    })
+    .catch((error) => {
+        console.error(error);
+    });
   const book = new Book({
     ...bookObject,
     userId: req.auth.userId,
