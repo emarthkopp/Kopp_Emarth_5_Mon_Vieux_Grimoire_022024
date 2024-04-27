@@ -1,5 +1,7 @@
+// Importation du module mongoose
 const mongoose = require('mongoose');
 
+// Définition du schéma pour la collection de livres
 const bookSchema = mongoose.Schema({
   userId: { type: String, required: true },
   title: { type: String, required: true },
@@ -16,4 +18,5 @@ const bookSchema = mongoose.Schema({
 
 });
 
+// Exportation du modèle de livre enregistré avec Mongoose
 module.exports = mongoose.model('Book', bookSchema);
